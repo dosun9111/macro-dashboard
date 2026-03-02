@@ -10,14 +10,14 @@ import yfinance as yf
 # PAGE CONFIG
 # ─────────────────────────────────────────
 st.set_page_config(
-    page_title="거시경제 & 투자 컨설턴트 대시보드",
+    page_title="거시경제 & 투자 전략 대시보드",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 # ─────────────────────────────────────────
-# CUSTOM CSS (두 앱의 디자인을 자연스럽게 통합)
+# CUSTOM CSS
 # ─────────────────────────────────────────
 st.markdown("""
 <style>
@@ -67,7 +67,7 @@ html, body, [data-testid="stAppViewContainer"] {
 [data-testid="stDataFrame"] { border: 1px solid #1e2435 !important; border-radius: 8px !important; }
 thead th { background: #0f1117 !important; color: #64748b !important; }
 
-/* 종목별 포트폴리오 카드 (디자인 통합) */
+/* 종목별 포트폴리오 카드 */
 .portfolio-card { background: #0f1117; border: 1px solid #1e2435; border-radius: 10px; padding: 20px; margin-bottom: 15px; }
 .portfolio-title { font-size: 18px; font-weight: 600; margin-bottom: 10px; border-bottom: 1px solid #1e2435; padding-bottom: 10px; display: flex; align-items: center; gap: 8px;}
 .strategy-box { background: #1a202c; border-left: 4px solid #3b82f6; padding: 12px 15px; margin-top: 15px; border-radius: 4px; font-size: 13.5px; color: #e2e8f0; }
@@ -200,22 +200,10 @@ def render_signal_card(title, ticker_hint, value, change, pct, signal, message, 
 # ─────────────────────────────────────────
 # SIDEBAR
 # ─────────────────────────────────────────
-st.sidebar.markdown("### 👋 김도선 님, 환영합니다.")
-st.sidebar.caption("ST인터내셔널 마케팅팀")
-st.sidebar.markdown("---")
 st.sidebar.markdown("### ⚙️ 내 포트폴리오 설정")
 st.sidebar.markdown("<span style='font-size:13px; color:#94a3b8'>정확한 물타기 타점 계산을 위해 현재 평단가를 입력하세요.</span>", unsafe_allow_html=True)
 avg_googl = st.sidebar.number_input("구글(GOOGL) 평단가 ($)", value=145.0)
 avg_tsla = st.sidebar.number_input("테슬라(TSLA) 평단가 ($)", value=190.0)
-
-st.sidebar.markdown("---")
-st.sidebar.markdown("### 💰 현금 보유 현황 (목표)")
-st.sidebar.markdown("""
-<div style='font-size:14px; color:#cbd5e1'>
-• <b>투입 대기 (신규):</b> 320만 원<br>
-• <b>화학주 익절 대기:</b> 약 350만 원
-</div>
-""", unsafe_allow_html=True)
 
 
 # ─────────────────────────────────────────
@@ -353,7 +341,7 @@ with tab1:
 
 
 # ==========================================
-# TAB 2: MICRO STRATEGY (다크 테마 디자인 융합)
+# TAB 2: MICRO STRATEGY
 # ==========================================
 with tab2:
     st.markdown('<div class="section-header">🛡️ 기존 우량주 방어선 (물타기 타점 계산기)</div>', unsafe_allow_html=True)
