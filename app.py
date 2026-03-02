@@ -172,6 +172,17 @@ button[kind="primary"] {
 """, unsafe_allow_html=True)
 
 # ─────────────────────────────────────────
+# UTILS
+# ─────────────────────────────────────────
+def hex_to_rgba(hex_color, alpha=0.15):
+    """HEX 색상을 RGBA 문자열로 변환하여 Plotly fillcolor 에러를 방지합니다."""
+    hex_color = hex_color.lstrip('#')
+    if len(hex_color) == 6:
+        r, g, b = tuple(int(hex_color[i:i+2], 16) for i in (0, 2, 4))
+        return f"rgba({r},{g},{b},{alpha})"
+    return hex_color
+
+# ─────────────────────────────────────────
 # DATA FETCHING (Yahoo Finance via yfinance)
 # ─────────────────────────────────────────
 @st.cache_data(ttl=300)  # 5분 캐시
@@ -193,7 +204,12 @@ def fetch_market_data():
         for name, ticker in tickers.items():
             try:
                 t = yf.Ticker(ticker)
-                hist = t.history(period="5d", interval="1d")
+                # 안정성을 위해 기간을 7일로 늘리고, 결측치(NaN)를 제거합니다.
+                hist = t.history(period="7d", interval="1d")
+                
+                if not hist.empty and "Close" in hist.columns:
+                    hist = hist.dropna(subset=["Close"])
+
                 if len(hist) >= 2:
                     current = hist["Close"].iloc[-1]
                     prev    = hist["Close"].iloc[-2]
@@ -215,6 +231,8 @@ def fetch_market_data():
                         "hist": hist["Close"].tolist(),
                         "dates": [str(d.date()) for d in hist.index],
                     }
+                else:
+                    results[name] = None
             except Exception:
                 results[name] = None
         return results, datetime.now().strftime("%Y-%m-%d %H:%M:%S KST")
@@ -228,7 +246,6 @@ def fetch_fear_greed():
     """CNN Fear & Greed Index (alternative.me API)"""
     try:
         r = requests.get("https://fear-and-greed-index.p.rapidapi.com/v1/fgi", timeout=5)
-        # fallback to free API
     except Exception:
         pass
     try:
@@ -306,7 +323,7 @@ def sparkline(hist_values, color):
         mode="lines",
         line=dict(color=color, width=2),
         fill="tozeroy",
-        fillcolor=color.replace(")", ",0.08)").replace("rgb", "rgba") if "rgb" in color else color + "15",
+        fillcolor=hex_to_rgba(color, 0.15),
     ))
     fig.update_layout(
         margin=dict(l=0, r=0, t=0, b=0),
