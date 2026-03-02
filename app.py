@@ -263,41 +263,39 @@ def fetch_fear_greed():
 # SIGNAL LOGIC
 # ─────────────────────────────────────────
 def get_signal(indicator, value):
-    """
-    각 지표별 신호등 판단 로직
-    returns: ("danger"|"warning"|"safe"|"neutral", "메시지")
-    """
     if value is None:
         return "neutral", "데이터 없음"
 
     if indicator == "WTI":
-        if value >= 90:   return "danger",  "🔴 위험 — 현금 대기"
-        elif value >= 85: return "warning", "🟡 경계 — 관망 권고"
-        elif value <= 80: return "safe",    "🟢 안전 — 정상 구간"
+        if value >= 90:   return "danger",  "🔴 시장 압박 — 현금 대기"
+        elif value >= 85: return "warning", "🟡 인플레 경계 — 관망"
+        elif value <= 80: return "safe",    "🟢 물가 안정 — 정상 구간"
         else:             return "neutral", "⚪ 관찰 — 모니터링"
 
     if indicator == "TNX":
-        if value >= 4.4:  return "danger",  "🔴 위험 — 기술주 부담"
-        elif value >= 4.3: return "warning","🟡 경계 — 주의 구간"
-        elif value <= 4.1: return "safe",   "🟢 매수 타이밍 접근"
-        else:              return "neutral","⚪ 중립 — 관찰 구간"
+        if value >= 4.4:   return "danger",  "🔴 기술주 타격 — 예수금 방어"
+        elif value >= 4.3: return "warning", "🟡 금리 부담 — 주의 구간"
+        elif value <= 4.1: return "safe",    "🟢 우호적 환경 — 비중 확대"
+        else:              return "neutral", "⚪ 중립 — 관찰 구간"
 
     if indicator == "VIX":
-        if value >= 30:   return "safe",    "🟢 극단 공포 — 분할 매수!"
-        elif value >= 20: return "warning", "🟡 경계 — 변동성 확대"
-        elif value < 15:  return "neutral", "⚪ 안정 — 평온 구간"
+        # 수정: VIX가 30 이상이면 '시장'은 극도 위험(danger)이나 '행동'은 매수
+        if value >= 30:   return "danger",  "🔴 극단 공포 — 분할 매수 개시!"
+        elif value >= 20: return "warning", "🟡 변동성 확대 — 경계"
+        elif value < 15:  return "safe",    "🟢 안정 — 평온 구간"
         else:             return "neutral", "⚪ 관찰 — 정상 범위"
 
     if indicator == "DXY":
-        if value >= 105:  return "danger",  "🔴 강달러 — 기술주 실적 압박"
-        elif value >= 103: return "warning","🟡 경계 — 달러 강세 주의"
-        else:             return "safe",    "🟢 안정 — 약달러 우호적"
+        if value >= 105:   return "danger",  "🔴 강달러 — 빅테크 실적 압박"
+        elif value >= 103: return "warning", "🟡 달러 강세 — 주의"
+        else:              return "safe",    "🟢 약달러 — 기술주 우호적"
 
     if indicator == "FNG":
-        if value <= 25:   return "safe",    "🟢 극도 공포 — 현금 투입!"
-        elif value <= 40: return "warning", "🟡 공포 — 관망"
-        elif value >= 75: return "danger",  "🔴 탐욕 — 신규 매수 자제"
-        else:             return "neutral", "⚪ 중립 — 관찰"
+        # 수정: 25 이하면 '시장'은 극도 위험(danger)이나 '행동'은 매수
+        if value <= 25:   return "danger",  "🔴 극단 공포 — 현금 투입!"
+        elif value <= 40: return "warning", "🟡 공포 — 투심 위축"
+        elif value >= 75: return "warning", "🟡 극단 탐욕 — 신규 매수 자제" # 탐욕도 warning으로 변경
+        else:             return "safe",    "🟢 정상 — 펀더멘털 집중"
 
     return "neutral", "—"
 
@@ -472,17 +470,17 @@ for i, (title, ticker, val, chg, pct, sig, msg, unit, hist) in enumerate(card_da
 st.markdown('<div class="section-header">투자 판단 기준표</div>', unsafe_allow_html=True)
 
 table_data = {
-    "지표":       ["WTI (원유)",      "10년물 금리",         "VIX (공포지수)",           "달러인덱스 (DXY)",      "공포·탐욕 지수"],
-    "현재값":     [],
-    "🔴 위험":   ["$85~90 돌파",      "4.4% 이상",           "20↑ (변동성 확대)",        "105 이상",              "75 이상 (탐욕)"],
-    "🟡 경계":   ["$80~85",           "4.1%~4.4%",           "15~20",                    "103~105",               "40~75"],
-    "🟢 기회":   ["$80 이하 안정",    "4.1% 이하 하락",      "30 이상 (극단 공포=매수)", "$103 이하",             "25 이하 (극단 공포)"],
-    "포트폴리오 영향": [
-        "인플레 재점화 → 금리 인하 지연",
-        "기술주 할인율↑ → 주가 하락",
-        "시장 패닉 → 역발상 매수 타이밍",
-        "환차손 → 빅테크 실적 악화",
-        "대중 심리 반대 매매 지표"
+    "지표":       ["WTI (원유)",      "10년물 금리",         "VIX (공포지수)",         "달러인덱스 (DXY)",      "공포·탐욕 지수"],
+    "현재값":      [],
+    "🔴 시장 위험": ["$90 이상",        "4.4% 이상",           "30 이상 (투매 발생)",      "105 이상",              "25 이하 (극단 공포)"],
+    "🟡 경계/관망": ["$85 ~ $90",       "4.3% ~ 4.4%",         "20 ~ 30",                "103 ~ 105",             "25~40 (공포) / 75↑ (탐욕)"],
+    "🟢 시장 안정": ["$80 이하",        "4.1% 이하",           "15 미만",                "103 미만",              "40 ~ 75 (정상)"],
+    "포트폴리오 행동": [
+        "위험 시 현금 대기",
+        "위험 시 기술주 비중 조절",
+        "🔴 30 이상 시 역발상 매수",
+        "위험 시 관망",
+        "🔴 25 이하 시 역발상 매수"
     ],
 }
 
